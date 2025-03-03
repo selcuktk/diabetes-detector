@@ -49,6 +49,25 @@ class Main:
         learning_rate = 0.09
         num_iterations = 10000
 
+        for i in range (num_iterations):
+                m = X.shape[1]  # number of examples
+                J = 0
+
+                # Forward propagation
+                """
+                ZL1 matrix consists of first layer units before activation
+                AL1 matrix consists of first layer units after activation and so on...
+                """
+
+                ZL1 = np.dot((wL1), X) + bL1
+                AL1 = sig(ZL1)
+
+                ZL2 = np.dot((wL2), AL1) + bL2
+                AL2 = sig(ZL2)
+
+                ZL3 = np.dot((wL3), AL2) + bL3
+                AL3 = sig(ZL3)
+
 
         
         
