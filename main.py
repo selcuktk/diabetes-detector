@@ -85,6 +85,18 @@ class Main:
                 dwL1 = (1/m) * np.dot(dzL1, X.T)
                 dbL1 = (1/m) * np.sum(dzL1, axis=1, keepdims=True)
 
+                # Gradient Descent - Update weights and biases
+                wL1 -= learning_rate * dwL1
+                bL1 -= learning_rate * dbL1
+
+                wL2 -= learning_rate * dwL2
+                bL2 -= learning_rate * dbL2
+
+                wL3 -= learning_rate * dwL3
+                bL3 -= learning_rate * dbL3
+
+                # Printing costs for every loop
+                print(f"{i} \t {J}")
 
         
         
