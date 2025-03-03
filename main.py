@@ -72,6 +72,19 @@ class Main:
                 J += -((Y*(np.log(AL3))) + (1-Y)*(np.log(1-AL3)))
                 J = np.sum(J)/m
 
+                # Back propagation
+                dzL3 = AL3 - Y
+                dwL3 = (1/m) * np.dot(dzL3, AL2.T)
+                dbL3 = (1/m) * np.sum(dzL3, axis=1, keepdims = True)
+
+                dzL2 = np.dot(wL3.T, dzL3) * (AL2) * (1-AL2)
+                dwL2 = (1/m) * np.dot(dzL2, AL1.T)
+                dbL2 = (1/m) * np.sum(dzL2, axis=1, keepdims=True)
+
+                dzL1 = np.dot(wL2.T, dzL2) * (AL1) * (1-AL1)
+                dwL1 = (1/m) * np.dot(dzL1, X.T)
+                dbL1 = (1/m) * np.sum(dzL1, axis=1, keepdims=True)
+
 
         
         
