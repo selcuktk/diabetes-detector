@@ -68,6 +68,10 @@ class Main:
                 ZL3 = np.dot((wL3), AL2) + bL3
                 AL3 = sig(ZL3)
 
+                # Calculation of Cost function for logistic regression
+                J += -((Y*(np.log(AL3))) + (1-Y)*(np.log(1-AL3)))
+                J = np.sum(J)/m
+
 
         
         
