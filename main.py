@@ -20,6 +20,10 @@ class Main:
         print(Y.shape)
         print("--------------")
 
+        # CREATION OF a DEEP LEARNING MODEL in a STATIC WAY
+
+        # This model implements a 3-layered deep learning model with 6-5-1 hidden units numbers recpectively.
+        # Also it is non-modular and hardcoded.
 
 
         
