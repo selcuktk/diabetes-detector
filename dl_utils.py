@@ -70,14 +70,17 @@ class dlf:
     
 class dl_functions:
     @staticmethod
-    def initialize_parameters(lsz):
-        # lsz is the list that contains size of the hidden layers and output layer
+    def initialize_parameters(layer_dims):
+        
+        np.random.seed(3)
         parameters = {}
-        L = len(lsz)
-        for l in range(1, L):
-            parameters["w" + str(l)] = np.random.randn(lsz[l], lsz[l-1]) * 0.01
-            parameters["b" + str(l)] = np.zeros((lsz[l], 1))
+        L = len(layer_dims)
 
-            assert(np.shape(parameters["w" + str(l)]) == (lsz[l], lsz[l-1]))
-            assert(np.shape(parameters["b" + str(l)]) == (lsz[l], 1))
+        for l in range(1, L):
+            parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l-1]) * 0.01
+            parameters['b' + str(l)] = np.zeros((layer_dims[l], 1), dtype=float)
+           
+            assert(parameters['W' + str(l)].shape == (layer_dims[l], layer_dims[l-1]))
+            assert(parameters['b' + str(l)].shape == (layer_dims[l], 1))
+
         return parameters
