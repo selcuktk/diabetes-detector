@@ -3,8 +3,12 @@ import numpy as np
 # deep learning functions
 class dlf:
     @staticmethod
-    def sigmoid(z):
-        return 1/(1 + np.exp(-z))
+    def sigmoid(Z):
+        
+        A = 1/(1+np.exp(-Z))
+        store = Z
+        
+        return A, store
     
     @staticmethod
     def sigmoid_derivative(aL):
@@ -21,8 +25,12 @@ class dlf:
         return daL
     
     @staticmethod
-    def relu(z):
-        return np.maximum(0, z)
+    def relu(Z):
+        
+        A = np.maximum(0,Z)
+        store = Z 
+
+        return A, store
 
     @staticmethod
     def relu_derivative(aL):
