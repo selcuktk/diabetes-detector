@@ -1,6 +1,7 @@
 import numpy as np
 
-class activation:
+# deep learning functions
+class dlf:
     @staticmethod
     def sigmoid(z):
         return 1/(1 + np.exp(-z))
