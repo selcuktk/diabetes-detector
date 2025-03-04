@@ -83,3 +83,9 @@ class dlf:
             assert(parameters['b' + str(l)].shape == (layer_dims[l], 1))
 
         return parameters
+    
+    """
+    liner_forward()             calculates output of multiplying weights with inputs for one layer
+    liner_activation_forward()  calculates activation of obtained output values from that one layer
+    L_model_forward()           calculates all layers of activated outputs
+    """
