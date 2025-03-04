@@ -68,7 +68,6 @@ class dlf:
         
         return dZ
     
-class dl_functions:
     @staticmethod
     def initialize_parameters(layer_dims):
         
