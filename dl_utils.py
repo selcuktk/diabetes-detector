@@ -89,3 +89,13 @@ class dlf:
     liner_activation_forward()  calculates activation of obtained output values from that one layer
     L_model_forward()           calculates all layers of activated outputs
     """
+
+    @staticmethod
+    def linear_forward(A, W, b):
+
+        Z = np.dot(W, A) + b
+        
+        assert(Z.shape == (W.shape[0], A.shape[1]))
+        store = (A, W, b)
+        
+        return Z, store
