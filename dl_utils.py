@@ -212,3 +212,30 @@ class dlf:
         assert (db.shape == b.shape)
         
         return dA_prev, dW, db
+    
+    @staticmethod
+    def linear_activation_backward(dA, store, activation):   
+        """
+        Implement the backward propagation for the LINEAR->ACTIVATION layer.
+        
+        Arguments:
+        dA -- post-activation gradient for current layer l 
+        store -- tuple of values (linear_store, activation_store) we store for computing backward propagation efficiently
+        activation -- the activation to be used in this layer, stored as a text string: "sigmoid" or "relu"
+        
+        Returns:
+        dA_prev -- Gradient of the cost with respect to the activation (of the previous layer l-1), same shape as A_prev
+        dW -- Gradient of the cost with respect to W (current layer l), same shape as W
+        db -- Gradient of the cost with respect to b (current layer l), same shape as b
+        """
+        linear_store, activation_store = store
+        
+        if activation == "relu":
+            dZ = dlf.relu_backward(dA, activation_store) 
+            dA_prev, dW, db = dlf.linear_backward(dZ, linear_store)
+            
+        elif activation == "sigmoid":
+            dZ = dlf.sigmoid_backward(dA, activation_store)
+            dA_prev, dW, db = dlf.linear_backward(dZ, linear_store)  
+        
+        return dA_prev, dW, db
