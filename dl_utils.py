@@ -131,3 +131,36 @@ class dlf:
         store = (linear_store, activation_store)
 
         return A, store
+    
+    @staticmethod
+    def L_model_forward(X, parameters):
+        """
+        Implement forward propagation for the [LINEAR->RELU]*(L-1)->LINEAR->SIGMOID computation
+        
+        Arguments:
+        X -- data, numpy array of shape (input size, number of examples)
+        parameters -- output of initialize_parameters_deep()
+        
+        Returns:
+        AL -- last post-activation value
+        stores -- list of stores containing:
+                    every store of linear_activation_forward() (there are L-1 of them, indexed from 0 to L-1)
+        """
+
+        stores = []
+        A = X
+        L = len(parameters) // 2                  # number of layers in the neural network
+        
+        # Implement [LINEAR -> RELU]*(L-1). Add "store" to the "stores" list.
+        for l in range(1, L):
+            A_prev = A 
+            A, store = dlf.linear_activation_forward(A_prev, parameters["W"+str(l)], parameters["b"+str(l)], "relu")   
+            stores.append(store) 
+        
+        # Implement LINEAR -> SIGMOID. Add "store" to the "stores" list.
+        AL, store = dlf.linear_activation_forward(A, parameters["W"+str(L)], parameters["b"+str(L)], "sigmoid") 
+        stores.append(store)
+        
+        assert(AL.shape == (1,X.shape[1]))
+                
+        return AL, stores
