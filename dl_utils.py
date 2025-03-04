@@ -11,8 +11,23 @@ class dlf:
         return A, store
     
     @staticmethod
-    def sigmoid_derivative(aL):
-        return aL * (1 - aL)
+    def sigmoid_backward(dA, store):
+        """
+        Implement the backward propagation for a single SIGMOID unit.
+
+        Arguments:
+        dA -- post-activation gradient, of any shape
+        store -- 'Z' where we store for computing backward propagation efficiently
+
+        Returns:
+        dZ -- Gradient of the cost with respect to Z
+        """
+        
+        Z = store
+        s = 1/(1+np.exp(-Z))
+        dZ = dA * s * (1-s)
+        
+        return dZ
 
     @staticmethod
     def leaky_relu(z, alpha=0.01):
@@ -33,10 +48,25 @@ class dlf:
         return A, store
 
     @staticmethod
-    def relu_derivative(aL):
-        daL = np.ones_like(aL)  
-        daL[aL <= 0] = 0       
-        return daL
+    def relu_backward(dA, store):
+        """
+        Implement the backward propagation for a single RELU unit.
+
+        Arguments:
+        dA -- post-activation gradient, of any shape
+        store -- 'Z' where we store for computing backward propagation efficiently
+
+        Returns:
+        dZ -- Gradient of the cost with respect to Z
+        """
+        
+        Z = store
+        dZ = np.array(dA, copy=True) # just converting dz to a correct object.
+        
+        # When z <= 0, you should set dz to 0 as well. 
+        dZ[Z <= 0] = 0
+        
+        return dZ
     
 class dl_functions:
     @staticmethod
