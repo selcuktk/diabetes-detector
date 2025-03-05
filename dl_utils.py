@@ -304,3 +304,32 @@ class dlf:
             parameters["W" + str(l+1)] -= learning_rate * grads["dW" + str(l+1)]
             parameters["b" + str(l+1)] -= learning_rate * grads["db" + str(l+1)] 
         return parameters   
+
+
+    # L_layer_model() simply builds the whole system by combining   forward propagation     L_model_forward(), 
+    #                                                               backward propagation    L_model_backward(),
+    #                                                               gradient descent        update_parameters()
+    @staticmethod
+    def L_layer_model(X, Y, layers_dim, learning_rate, num_iterations, print_cost):
+        
+        
+        np.random.seed(5)
+        costs = []
+        parameters = dlf.initialize_parameters(layers_dim)
+
+        for i in range (0, num_iterations):
+
+            AL, stores = dlf.L_model_forward(X, parameters)
+
+            cost = dlf.compute_cost(AL, Y)
+
+            grads = dlf.L_model_backward(AL, Y, stores)
+
+            parameters = dlf.update_parameters(parameters, grads, learning_rate)
+
+            if print_cost and i % 1 == 0 : 
+                print(str(i) + "\t\t" + str(cost))
+            if print_cost and i % 1 == 0 : 
+                costs.append(cost)
+        
+        return parameters
