@@ -11,7 +11,11 @@ class Main:
         # Separate features (X) and target (Y)
         X = data[:, :-1]  # All rows, all columns except the last (for features)
         Y = data[:, -1]   # All rows, last column (for target variable)
+
+        X, averages, sdeviation = dlf.normalization(X)
         X = X.T
+
+ 
 
         # Reshaping the target array (y)
         Y = Y.reshape(1, Y.size)
@@ -26,7 +30,7 @@ class Main:
         # This model implements a n-layered deep learning model with flexible numbers of hidden units.
         # Also it is modular compared to previous implementation.
 
-        final_parameters = dlf.L_layer_model(X, Y, [X.shape[0], 10, 6, 1], 0.005, 5000, True)
+        final_parameters = dlf.L_layer_model(X, Y, [X.shape[0], 10, 6, 1], 0.005, 5000, False)
 
 
 

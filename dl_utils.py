@@ -333,3 +333,15 @@ class dlf:
                 costs.append(cost)
         
         return parameters
+
+    @staticmethod
+    def normalization(X):
+
+        """
+        X represents a matrix that shaped as mxn where m is number of examples and n is number of features.
+        """
+        column_averages = np.mean(X, axis=0).reshape(1, X.shape[1])
+        column_sdeviation = (np.var(X, axis=0).reshape(1, X.shape[1])) ** 0.5
+        normalized_X = (X-column_averages)/(column_sdeviation)
+
+        return normalized_X, column_averages, column_sdeviation
