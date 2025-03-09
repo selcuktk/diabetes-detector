@@ -241,7 +241,7 @@ class dlf:
         return dA_prev, dW, db
     
     @staticmethod
-    def L_model_backward(AL, Y, stores):
+    def L_model_backward(AL, Y, stores, weighted_grads):
         """
         Implement the backward propagation for the [LINEAR->RELU] * (L-1) -> LINEAR -> SIGMOID group
         
@@ -269,6 +269,7 @@ class dlf:
         # Lth layer (SIGMOID -> LINEAR) gradients. Inputs: "dAL, current_store". Outputs: "grads["dAL-1"], grads["dWL"], grads["dbL"]
         current_store = stores[L-1]  
         grads["dA" + str(L-1)], grads["dW" + str(L)], grads["db" + str(L)] = dlf.linear_activation_backward(dAL, current_store, "sigmoid") 
+        weighted_grads["VdW" + str(L)] = 0.9 * (weighted_grads["VdW" + str(L)]) + 0.1 * (grads["dW" + str(L)])
         
         # Loop from l=L-2 to l=0
         for l in reversed(range(L-1)):
@@ -278,12 +279,13 @@ class dlf:
             dA_prev_temp, dW_temp, db_temp = dlf.linear_activation_backward(grads["dA"+str(l+1)], current_store, "relu")
             grads["dA" + str(l)] = dA_prev_temp
             grads["dW" + str(l + 1)] = dW_temp
+            weighted_grads["VdW" + str(l+1)] = 0.9 * (weighted_grads["VdW" + str(l+1)]) + 0.1 * (grads["dW" + str(l+1)])
             grads["db" + str(l + 1)] = db_temp 
 
-        return grads
+        return grads, weighted_grads
     
     @staticmethod
-    def update_parameters(parameters, grads, learning_rate):
+    def update_parameters(parameters, grads, learning_rate, weighted_grads):
         """
         Update parameters using gradient descent
         
@@ -301,7 +303,7 @@ class dlf:
 
         # Update rule for each parameter. Use a for loop.
         for l in range(L):
-            parameters["W" + str(l+1)] -= learning_rate * grads["dW" + str(l+1)]
+            parameters["W" + str(l+1)] -= learning_rate * weighted_grads["VdW" + str(l+1)]
             parameters["b" + str(l+1)] -= learning_rate * grads["db" + str(l+1)] 
         return parameters   
 
@@ -316,6 +318,17 @@ class dlf:
         np.random.seed(5)
         costs = []
         parameters = dlf.initialize_parameters(layers_dim)
+        
+        
+        # For implementation of the momentum optimization, weighted_grads are initialized with 0 for every layer
+        # Normally we can do bias correction, however in practice, it doesnt preferred so it wont be implemented.
+        weighted_grads = {}
+        L = len(layers_dim)
+        for l in range(1, L):
+            weighted_grads['VdW' + str(l)] = np.zeros((layers_dim[l], layers_dim[l-1]), dtype=float)         
+            assert(weighted_grads['VdW' + str(l)].shape == (layers_dim[l], layers_dim[l-1]))
+        
+        
 
         for i in range (0, num_iterations):
 
@@ -323,9 +336,9 @@ class dlf:
 
             cost = dlf.compute_cost(AL, Y)
 
-            grads = dlf.L_model_backward(AL, Y, stores)
+            grads, weighted_grads = dlf.L_model_backward(AL, Y, stores, weighted_grads)
 
-            parameters = dlf.update_parameters(parameters, grads, learning_rate)
+            parameters = dlf.update_parameters(parameters, grads, learning_rate, weighted_grads)
 
             if print_cost and i % 1 == 0 : 
                 print(str(i) + "\t\t" + str(cost))
