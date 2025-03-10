@@ -241,7 +241,7 @@ class dlf:
         return dA_prev, dW, db
     
     @staticmethod
-    def L_model_backward(AL, Y, stores):
+    def L_model_backward(AL, Y, stores, RMS_grads):
         """
         Implement the backward propagation for the [LINEAR->RELU] * (L-1) -> LINEAR -> SIGMOID group
         
@@ -269,6 +269,8 @@ class dlf:
         # Lth layer (SIGMOID -> LINEAR) gradients. Inputs: "dAL, current_store". Outputs: "grads["dAL-1"], grads["dWL"], grads["dbL"]
         current_store = stores[L-1]  
         grads["dA" + str(L-1)], grads["dW" + str(L)], grads["db" + str(L)] = dlf.linear_activation_backward(dAL, current_store, "sigmoid") 
+        RMS_grads['SdW' + str(L)] = 0.9*(RMS_grads['SdW' + str(L)]) + 0.1*(np.square(grads['dW' + str(L)]))
+        RMS_grads['Sdb' + str(L)] = 0.9*(RMS_grads['Sdb' + str(L)]) + 0.1*(np.square(grads['db' + str(L)]))
         
         # Loop from l=L-2 to l=0
         for l in reversed(range(L-1)):
@@ -278,12 +280,14 @@ class dlf:
             dA_prev_temp, dW_temp, db_temp = dlf.linear_activation_backward(grads["dA"+str(l+1)], current_store, "relu")
             grads["dA" + str(l)] = dA_prev_temp
             grads["dW" + str(l + 1)] = dW_temp
-            grads["db" + str(l + 1)] = db_temp 
+            grads["db" + str(l + 1)] = db_temp
+            RMS_grads['SdW' + str(l+1)] = 0.9*(RMS_grads['SdW' + str(l+1)]) + 0.1*(np.square(grads['dW' + str(l+1)]))
+            RMS_grads['Sdb' + str(l+1)] = 0.9*(RMS_grads['Sdb' + str(l+1)]) + 0.1*(np.square(grads['db' + str(l+1)]))
 
-        return grads
+        return grads, RMS_grads
     
     @staticmethod
-    def update_parameters(parameters, grads, learning_rate):
+    def update_parameters(parameters, grads, learning_rate, RMS_grads):
         """
         Update parameters using gradient descent
         
@@ -301,8 +305,8 @@ class dlf:
 
         # Update rule for each parameter. Use a for loop.
         for l in range(L):
-            parameters["W" + str(l+1)] -= learning_rate * grads["dW" + str(l+1)]
-            parameters["b" + str(l+1)] -= learning_rate * grads["db" + str(l+1)] 
+            parameters["W" + str(l+1)] -= learning_rate * grads["dW" + str(l+1)] / (np.sqrt(RMS_grads['SdW' + str(l+1)]) + 10**(-8))
+            parameters["b" + str(l+1)] -= learning_rate * grads["db" + str(l+1)] / (np.sqrt(RMS_grads['Sdb' + str(l+1)]) + 10**(-8))
         return parameters   
 
 
@@ -317,15 +321,23 @@ class dlf:
         costs = []
         parameters = dlf.initialize_parameters(layers_dim)
 
+        RMS_grads = {}
+        L = len(layers_dim)
+        for l in range(1, L):
+            RMS_grads['SdW' + str(l)] = np.zeros((layers_dim[l], layers_dim[l-1]), dtype=float)
+            RMS_grads['Sdb' + str(l)] = np.zeros((layers_dim[l], 1), dtype=float)
+            assert(RMS_grads['SdW' + str(l)].shape == (layers_dim[l], layers_dim[l-1]))
+            assert(RMS_grads['Sdb' + str(l)].shape == (layers_dim[l], 1))
+
         for i in range (0, num_iterations):
 
             AL, stores = dlf.L_model_forward(X, parameters)
 
             cost = dlf.compute_cost(AL, Y)
 
-            grads = dlf.L_model_backward(AL, Y, stores)
+            grads, RMS_grads = dlf.L_model_backward(AL, Y, stores, RMS_grads)
 
-            parameters = dlf.update_parameters(parameters, grads, learning_rate)
+            parameters = dlf.update_parameters(parameters, grads, learning_rate, RMS_grads)
 
             if print_cost and i % 1 == 0 : 
                 print(str(i) + "\t\t" + str(cost))
