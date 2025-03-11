@@ -241,7 +241,7 @@ class dlf:
         return dA_prev, dW, db
     
     @staticmethod
-    def L_model_backward(AL, Y, stores):
+    def L_model_backward(AL, Y, stores, adam_grads, i):
         """
         Implement the backward propagation for the [LINEAR->RELU] * (L-1) -> LINEAR -> SIGMOID group
         
@@ -268,8 +268,20 @@ class dlf:
         
         # Lth layer (SIGMOID -> LINEAR) gradients. Inputs: "dAL, current_store". Outputs: "grads["dAL-1"], grads["dWL"], grads["dbL"]
         current_store = stores[L-1]  
-        grads["dA" + str(L-1)], grads["dW" + str(L)], grads["db" + str(L)] = dlf.linear_activation_backward(dAL, current_store, "sigmoid") 
+        grads["dA" + str(L-1)], grads["dW" + str(L)], grads["db" + str(L)] = dlf.linear_activation_backward(dAL, current_store, "sigmoid")
+
+        # after calculating dW and db, following calculations are done for adam optimization algorithms 
+        adam_grads["VdW" + str(L)] = 0.9 * (adam_grads["VdW" + str(L)]) + 0.1 * (grads["dW" + str(L)])
+        adam_grads["SdW" + str(L)] = 0.9 * (adam_grads["SdW" + str(L)]) + 0.1 * (np.square(grads["dW" + str(L)]))
+        adam_grads["Vdb" + str(L)] = 0.9 * (adam_grads["Vdb" + str(L)]) + 0.1 * (grads["db" + str(L)])
+        adam_grads["Sdb" + str(L)] = 0.9 * (adam_grads["Sdb" + str(L)]) + 0.1 * (np.square(grads["db" + str(L)]))
         
+        # bias correction for adam optimization parameters
+        adam_grads["VdW" + str(L)] /= (1- (0.9)**i)
+        adam_grads["SdW" + str(L)] /= (1- (0.9)**i)
+        adam_grads["Vdb" + str(L)] /= (1- (0.9)**i)
+        adam_grads["Sdb" + str(L)] /= (1- (0.9)**i)
+
         # Loop from l=L-2 to l=0
         for l in reversed(range(L-1)):
             # lth layer: (RELU -> LINEAR) gradients.
@@ -280,10 +292,22 @@ class dlf:
             grads["dW" + str(l + 1)] = dW_temp
             grads["db" + str(l + 1)] = db_temp 
 
-        return grads
+            adam_grads["VdW" + str(l+1)] = 0.9 * (adam_grads["VdW" + str(l+1)]) + 0.1 * (grads["dW" + str(l+1)])
+            adam_grads["SdW" + str(l+1)] = 0.9 * (adam_grads["SdW" + str(l+1)]) + 0.1 * (np.square(grads["dW" + str(l+1)]))
+            adam_grads["Vdb" + str(l+1)] = 0.9 * (adam_grads["Vdb" + str(l+1)]) + 0.1 * (grads["db" + str(l+1)])
+            adam_grads["Sdb" + str(l+1)] = 0.9 * (adam_grads["Sdb" + str(l+1)]) + 0.1 * (np.square(grads["db" + str(l+1)])) 
+
+            # bias correction
+            adam_grads["VdW" + str(l+1)] /= (1- (0.9)**i)
+            adam_grads["SdW" + str(l+1)] /= (1- (0.9)**i)
+            adam_grads["Vdb" + str(l+1)] /= (1- (0.9)**i)
+            adam_grads["Sdb" + str(l+1)] /= (1- (0.9)**i)
+
+
+        return grads, adam_grads
     
     @staticmethod
-    def update_parameters(parameters, grads, learning_rate):
+    def update_parameters(parameters, grads, learning_rate, adam_grads):
         """
         Update parameters using gradient descent
         
@@ -301,8 +325,8 @@ class dlf:
 
         # Update rule for each parameter. Use a for loop.
         for l in range(L):
-            parameters["W" + str(l+1)] -= learning_rate * grads["dW" + str(l+1)]
-            parameters["b" + str(l+1)] -= learning_rate * grads["db" + str(l+1)] 
+            parameters["W" + str(l+1)] -= learning_rate * adam_grads["VdW" + str(l+1)] / (np.sqrt(adam_grads["SdW" + str(l+1)]) + 10**(-8))
+            parameters["b" + str(l+1)] -= learning_rate * adam_grads["Vdb" + str(l+1)] / (np.sqrt(adam_grads["Sdb" + str(l+1)]) + 10**(-8)) 
         return parameters   
 
 
@@ -311,7 +335,19 @@ class dlf:
     #                                                               gradient descent        update_parameters()
     @staticmethod
     def L_layer_model(X, Y, layers_dim, learning_rate, num_iterations, print_cost):
-        
+
+        adam_grads = {}
+        L = len(layers_dim)
+        for l in range(1, L):
+            adam_grads['VdW' + str(l)] = np.zeros((layers_dim[l], layers_dim[l-1]), dtype=float) 
+            adam_grads['SdW' + str(l)] = np.zeros((layers_dim[l], layers_dim[l-1]), dtype=float) 
+            adam_grads['Vdb' + str(l)] = np.zeros((layers_dim[l], 1), dtype=float) 
+            adam_grads['Sdb' + str(l)] = np.zeros((layers_dim[l], 1), dtype=float)   
+
+            assert(adam_grads['VdW' + str(l)].shape == (layers_dim[l], layers_dim[l-1]))
+            assert(adam_grads['SdW' + str(l)].shape == (layers_dim[l], layers_dim[l-1]))
+            assert(adam_grads['Vdb' + str(l)].shape == (layers_dim[l], 1))
+            assert(adam_grads['Sdb' + str(l)].shape == (layers_dim[l], 1))
         
         np.random.seed(5)
         costs = []
@@ -323,9 +359,9 @@ class dlf:
 
             cost = dlf.compute_cost(AL, Y)
 
-            grads = dlf.L_model_backward(AL, Y, stores)
+            grads, adam_grads = dlf.L_model_backward(AL, Y, stores, adam_grads, i)
 
-            parameters = dlf.update_parameters(parameters, grads, learning_rate)
+            parameters = dlf.update_parameters(parameters, grads, learning_rate, adam_grads)
 
             if print_cost and i % 1 == 0 : 
                 print(str(i) + "\t\t" + str(cost))
