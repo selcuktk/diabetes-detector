@@ -276,11 +276,14 @@ class dlf:
         adam_grads["Vdb" + str(L)] = 0.9 * (adam_grads["Vdb" + str(L)]) + 0.1 * (grads["db" + str(L)])
         adam_grads["Sdb" + str(L)] = 0.9 * (adam_grads["Sdb" + str(L)]) + 0.1 * (np.square(grads["db" + str(L)]))
         
-        # bias correction for adam optimization parameters
+        """
         adam_grads["VdW" + str(L)] /= (1- (0.9)**i)
         adam_grads["SdW" + str(L)] /= (1- (0.9)**i)
         adam_grads["Vdb" + str(L)] /= (1- (0.9)**i)
-        adam_grads["Sdb" + str(L)] /= (1- (0.9)**i)
+        adam_grads["Sdb" + str(L)] /= (1- (0.9)**i)        
+        """
+        # bias correction for adam optimization parameters
+
 
         # Loop from l=L-2 to l=0
         for l in reversed(range(L-1)):
@@ -297,11 +300,13 @@ class dlf:
             adam_grads["Vdb" + str(l+1)] = 0.9 * (adam_grads["Vdb" + str(l+1)]) + 0.1 * (grads["db" + str(l+1)])
             adam_grads["Sdb" + str(l+1)] = 0.9 * (adam_grads["Sdb" + str(l+1)]) + 0.1 * (np.square(grads["db" + str(l+1)])) 
 
+            """            
             # bias correction
             adam_grads["VdW" + str(l+1)] /= (1- (0.9)**i)
             adam_grads["SdW" + str(l+1)] /= (1- (0.9)**i)
             adam_grads["Vdb" + str(l+1)] /= (1- (0.9)**i)
             adam_grads["Sdb" + str(l+1)] /= (1- (0.9)**i)
+            """
 
 
         return grads, adam_grads
