@@ -270,6 +270,7 @@ class dlf:
         current_store = stores[L-1]  
         grads["dA" + str(L-1)], grads["dW" + str(L)], grads["db" + str(L)] = dlf.linear_activation_backward(dAL, current_store, "sigmoid") 
         weighted_grads["VdW" + str(L)] = 0.9 * (weighted_grads["VdW" + str(L)]) + 0.1 * (grads["dW" + str(L)])
+        weighted_grads["Vdb" + str(L)] = 0.9 * (weighted_grads["Vdb" + str(L)]) + 0.1 * (grads["db" + str(L)])
         
         # Loop from l=L-2 to l=0
         for l in reversed(range(L-1)):
@@ -280,7 +281,8 @@ class dlf:
             grads["dA" + str(l)] = dA_prev_temp
             grads["dW" + str(l + 1)] = dW_temp
             weighted_grads["VdW" + str(l+1)] = 0.9 * (weighted_grads["VdW" + str(l+1)]) + 0.1 * (grads["dW" + str(l+1)])
-            grads["db" + str(l + 1)] = db_temp 
+            grads["db" + str(l + 1)] = db_temp
+            weighted_grads["Vdb" + str(l+1)] = 0.9 * (weighted_grads["Vdb" + str(l+1)]) + 0.1 * (grads["db" + str(l+1)])
 
         return grads, weighted_grads
     
@@ -325,8 +327,11 @@ class dlf:
         weighted_grads = {}
         L = len(layers_dim)
         for l in range(1, L):
-            weighted_grads['VdW' + str(l)] = np.zeros((layers_dim[l], layers_dim[l-1]), dtype=float)         
+            weighted_grads['VdW' + str(l)] = np.zeros((layers_dim[l], layers_dim[l-1]), dtype=float) 
+            weighted_grads['Vdb' + str(l)] = np.zeros((layers_dim[l], 1), dtype=float) 
+
             assert(weighted_grads['VdW' + str(l)].shape == (layers_dim[l], layers_dim[l-1]))
+            assert(weighted_grads['Vdb' + str(l)].shape == (layers_dim[l], 1))
         
         
 
