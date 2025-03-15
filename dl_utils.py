@@ -187,8 +187,14 @@ class dlf:
 
         m = Y.shape[1]
 
+        """
         # Compute loss from aL and y.
-        cost = (-1/m)*np.sum((Y * np.log(AL)) + ((1-Y) * np.log(1-AL)), axis=1)
+        cost = (-1/m)*np.sum((Y * np.log(AL)) + ((1-Y) * np.log(1-AL)), axis=1)        
+        """
+        # This prevents to encounter with log0 and log1 for calculating 
+        epsilon = 1e-8  # Small value to prevent log(0)
+        AL = np.clip(AL, epsilon, 1 - epsilon)  # Ensure AL is within (0,1)
+        cost = (-1/m) * np.sum((Y * np.log(AL)) + ((1-Y) * np.log(1-AL)), axis=1)
 
         # To make sure your cost's shape is what we expect (e.g. this turns [[17]] into 17).
         cost = np.squeeze(cost)
