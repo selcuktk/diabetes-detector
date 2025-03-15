@@ -279,8 +279,15 @@ class dlf:
         m = AL.shape[1]
         Y = Y.reshape(AL.shape)  # after this line, Y is the same shape as AL
 
+        """
         # Initializing the backpropagation
-        dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
+        dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))        
+        """
+
+        # It ensures that AL is never 0 or 1, preventing division by zero.
+        epsilon = 1e-8
+        dAL = - (np.divide(Y, np.clip(AL, epsilon, 1 - epsilon)) - 
+                np.divide(1 - Y, np.clip(1 - AL, epsilon, 1 - epsilon)))
 
         # Lth layer (SIGMOID -> LINEAR) gradients. Inputs: "dAL, current_store". Outputs: "grads["dAL-1"], grads["dWL"], grads["dbL"]
         current_store = stores[L-1]
