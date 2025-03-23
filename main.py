@@ -30,7 +30,7 @@ class Main:
         # This model implements a n-layered deep learning model with flexible numbers of hidden units.
         # Also it is modular compared to previous implementation.
 
-        final_parameters = dlf.L_layer_model(X, Y, [X.shape[0], 10, 6, 1], 0.005, 5000, False)
+        final_parameters = dlf.L_layer_model(X, Y, [X.shape[0], 10, 6, 1], 0.0075, 10000, True)
 
 
 
