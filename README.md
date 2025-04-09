@@ -4,6 +4,13 @@
 
 Diabetes Detector is a deep learning project designed to determine whether a person has diabetes. Focused on enhancing the programmer's understanding of deep learning, **this project is developed without relying on pre-built libraries like TensorFlow**. It solely revolves around the model, with no backend or frontend integration. After training the model on selected data, users can test their own patient data to detect the presence of diabetes.
 
+## Data
+
+The dataset used in this project is the **Diabetes Healthcare Comprehensive Dataset**, available on Kaggle. It contains comprehensive healthcare data related to diabetes, including medical records, demographic information, and lifestyle factors. The dataset is used to predict the risk of diabetes or classify patients based on various factors such as age, BMI, blood pressure, and other medical conditions. This dataset is ideal for classification tasks, and the goal is to build a model that can effectively predict diabetes risk based on the available data.
+
+### Dataset Link
+[Diabetes Healthcare Comprehensive Dataset on Kaggle](https://www.kaggle.com/datasets/deependraverma13/diabetes-healthcare-comprehensive-dataset)
+
 ## Features
 
 - **Implementation of multiple optimization algorithms:** Gradient Descent, Momentum, RMSprop, Adam.
